@@ -6,6 +6,10 @@
 
 using namespace std;
 
+// To verify that n is an integer, first check that n is a number (via cin.fail()) and then check that it is an integer (n - floor(n) != 0
+// for n is non integer. cin.fail only checks the last input is valid so for int/double/float as long as the last char is a number
+// cin.fail() == 0 (eg. abc5 would return cin.fail() = false) <-- Test this
+
 int main()
 {
 	// Declare variables here
