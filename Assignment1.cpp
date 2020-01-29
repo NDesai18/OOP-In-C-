@@ -1,56 +1,101 @@
-// Program to calculate transition energy using simple Bohr formula
-
 #include<iostream>
 #include<iomanip>
 #include<cmath>
+#include<string>
 
-using namespace std;
-
-// To verify that n is an integer, first check that n is a number (via cin.fail()) and then check that it is an integer (n - floor(n) != 0
-// for n is non integer. cin.fail only checks the last input is valid so for int/double/float as long as the last char is a number
-// cin.fail() == 0 (eg. abc5 would return cin.fail() = false) <-- Test this
-
-int main()
+double deltaE(int Z, int n_i, int n_f) // returns the photon energy
 {
-	// Declare variables here
+	double delta_e;
+	delta_e = 13.6 * pow(Z, 2) * (pow(1 / n_f, 2) - pow(1 / n_i, 2));
+	return delta_e;
+}
+
+double eVToJoules(double E) //converts energies from eV to Joules
+{
+	double j;
+	j = E / 1.6;
+	return j;
+}
+
+int main(){
+bool run{ true };
+std::string temp;
+std::string temp1;
+std::string temp2;
+
+while (run == true) 
+{
 	int initial_quantum_number{};
 	int final_quantum_number{};
 	int atomic_number{};
 	double photon_energy{};
-	double input_initial_quantum_number{};
-	double input_final_quantum_number{};
-	double input_atomic_number{};
+	bool quantum_numbers_valid{ false };
+	bool units_valid{ false };
 
+	std::cout << "Enter the atomic number, Z, of the atom" << std::endl;
+	std::getline(std::cin, temp);
+	atomic_number = std::stoi(temp);
+	if (atomic_number >= 0) {
+		std::cout << "Z =" << atomic_number << std::endl;
+	}
+	else { 
+		continue;  //User cannot continue unless they enter a positive value of Z
+	}
 
-	// Ask user to enter atomic number
-	std::cout << "Enter the atomic number, Z, of the atom" << endl;
-	std::cin >> input_atomic_number;
-//   while (input_atomic_number - floor(input_atomic_number) != 0 || std::cin.fail());
-// 	{
-// 	std::cout << "Something went wrong, make sure Z is an integer \n Enter the atomic number, Z, of the atom" << endl;
-// 	std::cin.clear();
-// 	std::cin.ignore();
-// 	std::cin >> input_atomic_number;
-// 	}
-	atomic_number = input_atomic_number;
-	std::cout << "Atomic number = " << atomic_number << endl;
+	while (quantum_numbers_valid == false) 
+	{
+		std::cout << "Enter the initial quantum number, n_i" << std::endl;
+		std::getline(std::cin, temp1);
+		initial_quantum_number = std::stoi(temp1);
+		std::cout << "Enter the final quantum number, n_f" << std::endl;
+		std::getline(std::cin, temp2);
+		final_quantum_number = std::stoi(temp2);
 
+		if (initial_quantum_number <= final_quantum_number) {
+			std::cout << initial_quantum_number << ",";
+			std::cout << final_quantum_number << std::endl;
+			std::cout << "Error, the inital quantum number must be larger than the final quantum number" << std::endl;
+			std::cin.clear();
+			std::cin.ignore();
+			continue; //Again, user cannot continue unless their inputs are Physically allowed
+		}
+		else {
+			std::cout << "The initial quantum number is " << initial_quantum_number << "and the final quantum number is " << final_quantum_number << std::endl;
+			quantum_numbers_valid = true;
+		}
 
+	photon_energy = deltaE(atomic_number, initial_quantum_number, final_quantum_number);
 
-
-
-
-  // Ask user to enter initial and final quantum numbers
-  std::cout << "Enter the initial quantum number, n_i" << endl;
-  std::cin >> initial_quantum_number;
-  std::cout << "Enter the final quantum number, n_j" << endl;
-  std::cin >> final_quantum_number;
-  
-  // Compute photon energy, Delta E = 13.6*(Z^2)*(1/n_j^2-1/n_i^2) eV
-  photon_energy = 13.6*pow(atomic_number,2)*(pow(1/final_quantum_number,2)-pow(1/initial_quantum_number,2));
-
-  // Output answer
-  std::cout << "The photon energy is " << photon_energy << "eV" << std::endl;
-
-  return 0;
+	while (units_valid == false)
+	{
+		std::cout << "Would you like the energy in eV (e) or Joules (j)?" << std::endl;
+		std::string units;
+		std::cin >> units;
+		if (units == "e") {
+			std::cout << "The photon energy is " << std::setprecision(3) << photon_energy << "eV" << std::endl;
+			units_valid = true;
+		}
+		else if (units == "j") {
+			photon_energy = eVToJoules(photon_energy);
+			std::cout << "The photon energy is " << std::setprecision(3) << photon_energy << "x10^-16 J" << std::endl;
+			units_valid = true;
+		}
+		else {
+			continue;
+		}
+		std::cout << "Press y to run the program again, or any other key to exit" << std::endl;
+		std::string yesno;
+		std::cin >> yesno;
+		if (yesno == "y") {
+			std::cin.clear();
+			std::cin.ignore();
+			continue;
+		}
+		else {
+			run = false;
+		}
+	}
+}
+}
+return 0;
 }
