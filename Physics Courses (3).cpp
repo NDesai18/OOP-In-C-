@@ -58,88 +58,91 @@ int main()
 			}
 
 		}
-	}
-	while (display) {
-		std::vector<std::string>::iterator course_iterator;
-		std::vector<std::string>::iterator courses_begin{ courses.begin() };
-		std::vector<std::string>::iterator courses_end{ courses.end() };
-		std::cout << "Here you can you can view the courses by course code (enter a) or by their year (1, 2, 3 or 4 respectively)" << std::endl;
-		std::cin.clear();
-		std::string sort_type;
-		std::cin >> sort_type;
-		if (sort_type == "a") {
-			sort(courses_begin, courses_end);
-			for (course_iterator = courses_begin; course_iterator < courses_end; course_iterator++) {
-				std::cout << *course_iterator << std::endl;
-			}
-		}
-		else if (sort_type == "1") {
-			for (course_iterator = courses_begin; course_iterator < courses_end; course_iterator++) {
-				std::string test_string;
-				test_string = *course_iterator;
-				if (test_string.at(5) == '1') {
-					std::cout << test_string << std::endl;
-				}
-				else {
-					continue;
-				}
-			}
-		}
-		else if (sort_type == "2") {
-			for (course_iterator = courses_begin; course_iterator < courses_end; course_iterator++) {
-				std::string test_string;
-				test_string = *course_iterator;
-				if (test_string.at(5) == '2') {
-					std::cout << test_string << std::endl;
-				}
-				else {
-					continue;
-				}
-			}
-		}
-		else if (sort_type == "3") {
-			for (course_iterator = courses_begin; course_iterator < courses_end; course_iterator++) {
-				std::string test_string;
-				test_string = *course_iterator;
-				if (test_string.at(5) == '3') {
-					std::cout << test_string << std::endl;
-				}
-				else {
-					continue;
-				}
-			}
-		}
-		else if (sort_type == "4") {
-			for (course_iterator = courses_begin; course_iterator < courses_end; course_iterator++) {
-				std::string test_string;
-				test_string = *course_iterator;
-				if (test_string.at(5) == '4') {
-					std::cout << test_string << std::endl;
-				}
-				else {
-					continue;
-				}
-			}
-		}
-		else {
-			std::cout << "Please enter a, 1, 2, 3 or 4" << std::endl;
+		while (display) {
+			std::vector<std::string>::iterator course_iterator;
+			std::vector<std::string>::iterator courses_begin{ courses.begin() };
+			std::vector<std::string>::iterator courses_end{ courses.end() };
+			std::cout << "Here you can you can view the courses by course code (enter a) or by their year (1, 2, 3 or 4 respectively)" << std::endl;
 			std::cin.clear();
-			std::cin.ignore();
-			continue;
-		}
-		std::string exit;
-		std::cout << "Press x if you would like to display the courses again or n if you would like to add more entries, otherwise press any other key to exit the program" << std::endl;
-		std::cin.clear();
-		std::cin >> exit;
-		if (exit == "x") {
-			continue;
-		}
-		else if (exit == "n") {
-			finished_entering = false;
-			display = false;
-		}
-		else {
-			display = false;
+			std::string sort_type;
+			std::cin >> sort_type;
+			if (sort_type == "a") {
+				sort(courses_begin, courses_end);
+				for (course_iterator = courses_begin; course_iterator < courses_end; course_iterator++) {
+					std::cout << *course_iterator << std::endl;
+				}
+			}
+			else if (sort_type == "1") {
+				for (course_iterator = courses_begin; course_iterator < courses_end; course_iterator++) {
+					std::string test_string;
+					test_string = *course_iterator;
+					if (test_string.at(5) == '1') {
+						std::cout << test_string << std::endl;
+					}
+					else {
+						continue;
+					}
+				}
+			}
+			else if (sort_type == "2") {
+				for (course_iterator = courses_begin; course_iterator < courses_end; course_iterator++) {
+					std::string test_string;
+					test_string = *course_iterator;
+					if (test_string.at(5) == '2') {
+						std::cout << test_string << std::endl;
+					}
+					else {
+						continue;
+					}
+				}
+			}
+			else if (sort_type == "3") {
+				for (course_iterator = courses_begin; course_iterator < courses_end; course_iterator++) {
+					std::string test_string;
+					test_string = *course_iterator;
+					if (test_string.at(5) == '3') {
+						std::cout << test_string << std::endl;
+					}
+					else {
+						continue;
+					}
+				}
+			}
+			else if (sort_type == "4") {
+				for (course_iterator = courses_begin; course_iterator < courses_end; course_iterator++) {
+					std::string test_string;
+					test_string = *course_iterator;
+					if (test_string.at(5) == '4') {
+						std::cout << test_string << std::endl;
+					}
+					else {
+						continue;
+					}
+				}
+			}
+			else {
+				std::cout << "Please enter a, 1, 2, 3 or 4" << std::endl;
+				std::cin.clear();
+				std::cin.ignore();
+				continue;
+			}
+			std::string exit;
+			std::cout << "Press x if you would like to display the courses again or n if you would like to add more entries, otherwise press any other key to exit the program" << std::endl;
+			std::cin.clear();
+			std::cin >> exit;
+			if (exit == "x") {
+				continue;
+			}
+			else if (exit == "n") {
+				std::cin.clear();
+				std::cin.ignore();
+				finished_entering = false;
+				display = false;
+				continue;
+			}
+			else {
+				display = false;
+			}
 		}
 	}
 	std::cout << "The program will now shut down" << std::endl;
