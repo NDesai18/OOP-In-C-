@@ -1,3 +1,5 @@
+//To improve, add a way to sort alphabetically (kill first part of the string (PHYSYYYY and then sort vector)
+
 #include<iostream>
 #include<string>
 #include<sstream>
