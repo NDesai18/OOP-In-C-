@@ -1,4 +1,6 @@
-//To improve, add a way to sort alphabetically (kill first part of the string (PHYSYYYY and then sort vector)
+// To improve, add a way to sort alphabetically (kill first part of the string (PHYSYYYY and then sort vector)
+// Make sort by year simpler
+// Instead of having user input a key to keep entering, let them enter as many courses as they want.
 
 #include<iostream>
 #include<string>
