@@ -19,18 +19,25 @@ public:
 	{}
 	~galaxy() {};
 
-	double stellar_mass();
-	void set_type(const std::string &type) { hubble_type = type; }
+	double calculate_stellar_mass(bool satellite);
+	void set_type(const std::string& type) { hubble_type = type; }
 	void print_data();
-	void add_satellite(const galaxy &satellite) { satellites.push_back(satellite); }
+	void add_satellite(const galaxy& satellite) { satellites.push_back(satellite); }
 	void print_satellite_data();
 };
 
-double galaxy::stellar_mass()
+double galaxy::calculate_stellar_mass(bool satellite)
 {
-	double stellar_mass = stellar_mass_fraction * total_mass;
-	std::cout << "The stellar mass is " << stellar_mass << std::endl;
-	return stellar_mass;
+	if (!satellite) {
+		double stellar_mass = stellar_mass_fraction * total_mass;
+		std::cout << "The galaxy's stellar mass is " << stellar_mass << std::endl;
+		return stellar_mass;
+	}
+	if (satellite) {
+		double stellar_mass = stellar_mass_fraction * total_mass;
+		std::cout << "The satellite galaxy's stellar mass is " << stellar_mass << std::endl;
+		return stellar_mass;
+	}
 }
 
 void galaxy::print_data()
@@ -41,6 +48,7 @@ void galaxy::print_data()
 		std::vector<galaxy>::iterator satellite_iterator;
 		for (satellite_iterator = satellites.begin(); satellite_iterator < satellites.end(); satellite_iterator++) {
 			satellite_iterator->galaxy::print_satellite_data();
+			satellite_iterator->galaxy::calculate_stellar_mass(true);	
 		}
 	}
 }
@@ -54,7 +62,7 @@ std::string validate_type() //Function to receive and validate galaxy types
 {
 	bool validated = false;
 	while (!validated) {
-		std::string allowed_types[17] = { "E0", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "S0", "Sa", "Sb", "Sc", "SBa", "SBb", "SBc", "Irr", " "}; 
+		std::string allowed_types[17] = { "E0", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "S0", "Sa", "Sb", "Sc", "SBa", "SBb", "SBc", "Irr", " " };
 		std::cin.clear();
 		std::string temp;
 		std::cin >> temp;
@@ -98,6 +106,23 @@ double get_input(double a, double b) //Function to get the input of user between
 	}
 }
 
+galaxy create_galaxy(bool satellite, int satellite_number)
+{
+	std::string type;
+	if (!satellite) {
+		std::cout << "Enter the hubble type of the galaxy" << std::endl;
+		type = validate_type();
+		std::cout << "Enter the redshift of the galaxy" << std::endl;
+		double redshift = get_input(0.0, 10.0);
+		std::cout << "Enter the mass of the galaxy" << std::endl;
+		double mass = get_input(pow(10, 7), pow(10, 12));
+		std::cout << "Enter the stellar mass fraction of the galaxy" << std::endl;
+		double mass_fraction = get_input(0.0, 0.05);
+		galaxy g1(type, redshift, mass, mass_fraction);
+		return g1;
+	}
+}
+
 int main()
 {
 	bool view = false;
@@ -119,19 +144,11 @@ int main()
 			view = true;
 		}
 		else {
-			std::cout << "Enter the hubble type of the galaxy" << std::endl;
-			type = validate_type();
-			std::cout << "Enter the redshift of the galaxy" << std::endl;
-			double redshift = get_input(0.0, 10.0);
-			std::cout << "Enter the mass of the galaxy" << std::endl;
-			double mass = get_input(pow(10, 7), pow(10, 12));
-			std::cout << "Enter the stellar mass fraction of the galaxy" << std::endl;
-			double mass_fraction = get_input(0.0, 0.05);
+			galaxy g1 = create_galaxy(false, 0);
 			std::cout << "If this galaxy has any satellites, enter the number of satellites else, enter 0" << std::endl;
 			std::cin.clear();
 			int satellite_number;
 			std::cin >> satellite_number;
-			galaxy g1(type, redshift, mass, mass_fraction);
 			for (int i = 0; i < satellite_number; i++) {
 				std::cout << "Enter the hubble type of the satellite galaxy" << std::endl;
 				type = validate_type();
@@ -175,11 +192,12 @@ int main()
 		}
 	}
 
-	if (view) {
+	if(view) {
 		std::cout << "The galaxies are" << std::endl;
 		for (auto galaxy_iterator = galaxy_data.begin(); galaxy_iterator < galaxy_data.end(); galaxy_iterator++) {
 			galaxy_iterator->galaxy::print_data();
-			galaxy_iterator->galaxy::stellar_mass();
+			galaxy_iterator->galaxy::calculate_stellar_mass(false);
 		}
 	}
+	return 0;
 }
