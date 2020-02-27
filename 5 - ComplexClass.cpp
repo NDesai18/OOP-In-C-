@@ -167,8 +167,8 @@ int main()
 	std::cout << "The complex numbers a and b are given by " << a << " and " << b << std::endl;
 	std::cout << "arg(a) = " << a.get_argument(a) << " mod(a) = " << a.get_modulus(a) << " Re(a) = " << a.get_real() << " Im(a) = " << a.get_imaginary() << std::endl;
 	std::cout << "arg(b) = " << b.get_argument(b) << " mod(b) = " << b.get_modulus(b) << " Re(b) = " << b.get_real() << " Im(b) = " << b.get_imaginary() << std::endl;
-	std::cout << "The complex conjugate of a is" << a.get_conjugate(a) << std::endl;
-	std::cout << "The complex conjugate of b is" << b.get_conjugate(b) << std::endl;
+	std::cout << "The complex conjugate of a is " << a.get_conjugate(a) << std::endl;
+	std::cout << "The complex conjugate of b is " << b.get_conjugate(b) << std::endl;
 	std::cout << "a+b is given by " << a + b << std::endl;
 	std::cout << "a-b is given by " << a - b << std::endl;
 	std::cout << "a*b is given by " << a * b << std::endl;
