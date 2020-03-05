@@ -7,18 +7,17 @@
 class matrix
 {
 private:
-	int rows = 0;
-	int columns = 0;
+	int rows;
+	int columns;
 	double* matrix_element{ nullptr };
 
 	//Friends
-	friend std::ostream& operator<<(std::ostream& os, const matrix& m);
-	friend std::istream& operator>>(std::istream& is, matrix& m);
+	//friend std::ostream& operator<<(std::ostream& os, const matrix& m);
+	//friend std::istream& operator>>(std::istream& is, matrix& m);
 
 public:
-	matrix() { matrix_element = 0; rows = 0; columns = 0; }
-	matrix(int r, int c) : rows{ r }, columns{ c }, matrix_element{ new double[r * c] } //Creates an array of size row*column to store the matrix elements
-	{}
+	matrix() { rows = columns = 0; matrix_element = 0; }
+	matrix(int r, int c); //Creates an array of size row*column to store the matrix elements
 	~matrix() { std::cout << "Destroying matrix" << std::endl; delete matrix_element; }
 
 	//Copy and Move constructors
@@ -26,12 +25,12 @@ public:
 	matrix(matrix&&);
 
 	//Class functions
-	int get_rows();
-	int get_columns();
+	int get_rows() { return rows; }
+	int get_columns() { return columns; }
 	void set_rows(int rows_in) { rows = rows_in; }
 	void set_columns(int columns_in) { columns = columns_in; }
-	matrix shrink_matrix(); //Function to shrink matrix by deleting the ith row and jth column and return shrunk matrix
-	double get_square_determinant(); //Returns the determinant of a square matrix using expansion in minors
+	//matrix shrink_matrix(); //Function to shrink matrix by deleting the ith row and jth column and return shrunk matrix
+	//double get_square_determinant(); //Returns the determinant of a square matrix using expansion in minors
 	
 	//Overload Operators
 	matrix operator+(const matrix &m) const
@@ -39,37 +38,97 @@ public:
 		if (rows == m.rows && columns == m.columns) {
 			matrix temp(rows, columns);
 			for (int i = 0; i < rows * columns; i++) {
-			temp[i] = matrix_element[i] + m.matrix_element[i];
+				temp[i] = matrix_element[i] + m.matrix_element[i];
 			}
 			return temp;
 		}
 		else {
 			std::cout << "Unable to compute matrix" << std::endl;
+			exit(1);
 		}
 	}
-	matrix operator-();
-	matrix operator*();
-	double& operator[] (size_t i);
+	//matrix operator-();
+	//matrix operator*();
+	double& operator[] (int i);
+	matrix& operator=( matrix& m);
+	matrix& operator=(matrix&& m);
 		
 };
 
-double& matrix::operator[] (size_t i)
+matrix::matrix(int r, int c)
+{
+	rows = r;
+	columns = c;
+	matrix_element = new double[rows * columns];
+	for (int i = 0; i < rows * columns; i++) {
+		matrix_element[i] = 0;
+	}
+}
+
+matrix::matrix(matrix& m)
+{
+	matrix_element = 0; rows = m.rows; columns = m.columns;
+	if (rows > 0 && columns > 0) {
+		matrix_element = new double[rows * columns];
+		for (int i = 0; i < rows * columns; i++) {
+			matrix_element[i] = m[i];
+		}
+	}
+}
+
+matrix::matrix(matrix&& m)
+{
+	rows = m.rows;
+	columns = m.columns;
+	m.rows = m.columns = 0;
+	m.matrix_element = nullptr;
+}
+
+double& matrix::operator[] (int i)
 {
 	return matrix_element[i];
 }
 
+matrix& matrix::operator=( matrix& m)
+{
+	if (&m == this) {
+		return *this;
+	}
+	delete[] matrix_element;
+	matrix_element = 0;
+	rows = 0;
+	columns = 0;
+	rows = m.rows;
+	columns = m.columns;
+	matrix_element = nullptr;
+	if (rows * columns > 0) {
+		matrix_element = new double[rows * columns];
+		for (int i = 0; i < rows * columns; i++) {
+			matrix_element[i] = m[i];
+		}
+	}
+	return *this;
+}
+
+matrix& matrix::operator=(matrix&& m) {
+	std::swap(rows, m.rows);
+	std::swap(columns, m.columns);
+	std::swap(matrix_element, m.matrix_element);
+	return *this;
+}
+
+
 int main()
 {
 	matrix m1(2,2);
-	matrix m2(2,2);
+	matrix m2();
 	for (int i = 0; i < 4; i++) {
 		m1[i] = i;
-		m2[i] = i;
 	}
-	matrix m3 = m1 + m2;
 	for (int i = 0; i < 4; i++) {
-		std::cout << m3[i] << std::endl;
+		std::cout << m1[i] << std::endl;
 	}
+	m2 = m1;
 	return 0;
 }
 
