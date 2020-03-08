@@ -1,3 +1,13 @@
+/*
+Features completed:
+os operator, copy, move constructors, overload operators +, -, *, [], =
+
+Functions to add
+shrink_matrix()
+recursively calculate square determinant
+Anything else on the prompt
+*/
+
 #include<iostream>
 #include<cmath>
 #include<vector>
@@ -9,10 +19,10 @@ class matrix
 private:
 	int rows;
 	int columns;
-	double* matrix_element{ nullptr };
+	double* matrix_element;
 
 	//Friends
-	//friend std::ostream& operator<<(std::ostream& os, const matrix& m);
+	friend std::ostream& operator<<(std::ostream& os, const matrix& m);
 	//friend std::istream& operator>>(std::istream& is, matrix& m);
 
 public:
@@ -31,7 +41,7 @@ public:
 	void set_columns(int columns_in) { columns = columns_in; }
 	//matrix shrink_matrix(); //Function to shrink matrix by deleting the ith row and jth column and return shrunk matrix
 	//double get_square_determinant(); //Returns the determinant of a square matrix using expansion in minors
-	
+
 	//Overload Operators
 	matrix operator+(const matrix& m) const
 	{
@@ -47,7 +57,7 @@ public:
 			exit(1);
 		}
 	}
-	matrix operator-(const matrix &m) const
+	matrix operator-(const matrix& m) const
 	{
 		if (rows == m.rows && columns == m.columns) {
 			matrix temp(rows, columns);
@@ -61,11 +71,41 @@ public:
 			exit(1);
 		}
 	}
-	//matrix operator*();
+	matrix operator*(const matrix &m) const //m1*m2
+	{
+		if (columns == m.rows) {
+			matrix temp(rows, m.columns);
+			int element_position = 0; //element position tracks the position of the elements of the product matrix
+			int column_offset = 0; //keeps a track of the columns in m2
+			int row_number = 1; //keeps a track of the row in m1
+			int row_offset = 0; //offset to progress to the next row when done with the previous in m1
+			double temp_element = 0;
+			while (element_position < rows * m.columns) {
+				for (int row_position = row_offset, column_position = column_offset; row_position < row_number*rows && column_position < m.columns * m.rows; row_position++, column_position += m.columns) {
+					temp_element += matrix_element[row_position] * m.matrix_element[column_position]; //adds together the product of matrix elements for each element position until done with doing elements in row*elements in column
+				}
+				temp[element_position] = temp_element;
+				temp_element = 0;
+				element_position++;
+				column_offset++;
+				if (column_offset == m.columns) { //resets column offset when the end of m2 is reached and advances the row number by 1
+					column_offset = 0; 
+					row_number += 1; 
+					row_offset += m.columns;
+					continue;
+				}
+			}
+			return temp;
+		}
+		else {
+			std::cout << "The two matrices cannot be multiplied together" << std::endl;
+			exit(1);
+		}
+	}
 	double& operator[] (int i);
-	matrix& operator=( matrix& m);
+	matrix& operator=(matrix& m); 
 	matrix& operator=(matrix&& m);
-		
+
 };
 
 matrix::matrix(int r, int c)
@@ -84,7 +124,7 @@ matrix::matrix(matrix& m)
 	if (rows > 0 && columns > 0) {
 		matrix_element = new double[rows * columns];
 		for (int i = 0; i < rows * columns; i++) {
-			matrix_element[i] = m[i];
+			matrix_element[i] = m.matrix_element[i];
 		}
 	}
 }
@@ -93,6 +133,7 @@ matrix::matrix(matrix&& m)
 {
 	rows = m.rows;
 	columns = m.columns;
+	matrix_element = m.matrix_element;
 	m.rows = m.columns = 0;
 	m.matrix_element = nullptr;
 }
@@ -102,7 +143,7 @@ double& matrix::operator[] (int i)
 	return matrix_element[i];
 }
 
-matrix& matrix::operator=( matrix& m)
+matrix& matrix::operator=(matrix& m)
 {
 	if (&m == this) {
 		return *this;
@@ -130,16 +171,34 @@ matrix& matrix::operator=(matrix&& m) {
 	return *this;
 }
 
+std::ostream& operator<<(std::ostream& os, const matrix& m)
+{
+	int element_position = 0;
+	int row_counter = 0; //tracks where along the row the element is
+	for (int i = 0; i < m.rows * m.columns; i++) {
+		os << m.matrix_element[i] << " ";
+		row_counter++;
+		if (row_counter == m.columns) {
+			os << std::endl;
+			row_counter = 0;
+			continue;
+		}
+		else {
+			continue;
+		}
+	}
+	return os;
+}
+
 int main()
 {
-	matrix m1(2,2);
+	matrix m1(2, 2);
 	matrix m2;
 	for (int i = 0; i < 4; i++) {
 		m1[i] = i;
 	}
-	for (int i = 0; i < 4; i++) {
-		std::cout << m1[i] << std::endl;
-	}
 	m2 = m1;
+	matrix m3;
+	m3 = m1 * m2;
 	return 0;
 }
