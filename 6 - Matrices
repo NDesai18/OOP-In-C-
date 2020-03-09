@@ -1,13 +1,3 @@
-/*
-Features completed:
-os operator, copy, move constructors, overload operators +, -, *, [], =
-
-Functions to add
-shrink_matrix()
-recursively calculate square determinant
-Anything else on the prompt
-*/
-
 #include<iostream>
 #include<cmath>
 #include<vector>
@@ -23,7 +13,7 @@ private:
 
 	//Friends
 	friend std::ostream& operator<<(std::ostream& os, const matrix& m);
-	//friend std::istream& operator>>(std::istream& is, matrix& m);
+	friend std::istream& operator>>(std::istream& is, matrix& m);
 
 public:
 	matrix() { rows = columns = 0; matrix_element = 0; }
@@ -39,8 +29,10 @@ public:
 	int get_columns() { return columns; }
 	void set_rows(int rows_in) { rows = rows_in; }
 	void set_columns(int columns_in) { columns = columns_in; }
-	//matrix shrink_matrix(); //Function to shrink matrix by deleting the ith row and jth column and return shrunk matrix
-	//double get_square_determinant(); //Returns the determinant of a square matrix using expansion in minors
+	void change_size(int rows, int columns) { matrix_element = new double[rows * columns]; }
+	int get_element_position(int rows, int columns);
+	matrix shrink_matrix(int row, int column); //Function to shrink matrix by deleting the ith row and jth column and return shrunk matrix
+	double get_square_determinant(); //Returns the determinant of a square matrix using expansion in minors
 
 	//Overload Operators
 	matrix operator+(const matrix& m) const
@@ -71,7 +63,7 @@ public:
 			exit(1);
 		}
 	}
-	matrix operator*(const matrix &m) const //m1*m2
+	matrix operator*(const matrix& m) const //m1*m2
 	{
 		if (columns == m.rows) {
 			matrix temp(rows, m.columns);
@@ -81,7 +73,7 @@ public:
 			int row_offset = 0; //offset to progress to the next row when done with the previous in m1
 			double temp_element = 0;
 			while (element_position < rows * m.columns) {
-				for (int row_position = row_offset, column_position = column_offset; row_position < row_number*rows && column_position < m.columns * m.rows; row_position++, column_position += m.columns) {
+				for (int row_position = row_offset, column_position = column_offset; row_position < row_number * rows && column_position < m.columns * m.rows; row_position++, column_position += m.columns) {
 					temp_element += matrix_element[row_position] * m.matrix_element[column_position]; //adds together the product of matrix elements for each element position until done with doing elements in row*elements in column
 				}
 				temp[element_position] = temp_element;
@@ -89,8 +81,8 @@ public:
 				element_position++;
 				column_offset++;
 				if (column_offset == m.columns) { //resets column offset when the end of m2 is reached and advances the row number by 1
-					column_offset = 0; 
-					row_number += 1; 
+					column_offset = 0;
+					row_number += 1;
 					row_offset += m.columns;
 					continue;
 				}
@@ -103,7 +95,7 @@ public:
 		}
 	}
 	double& operator[] (int i);
-	matrix& operator=(matrix& m); 
+	matrix& operator=(matrix& m);
 	matrix& operator=(matrix&& m);
 
 };
@@ -136,6 +128,57 @@ matrix::matrix(matrix&& m)
 	matrix_element = m.matrix_element;
 	m.rows = m.columns = 0;
 	m.matrix_element = nullptr;
+}
+
+int  matrix::get_element_position(int row, int column)
+{
+	if (row > rows || column > columns) {
+		std::cout << "Position is out of range of the array" << std::endl;
+		exit(-1);
+	}
+	int position = (column - 1) + ((row - 1) * columns);
+	return position;
+}
+
+matrix matrix::shrink_matrix(int row, int column)
+{
+	int element_position = 0;
+	matrix temp(rows - 1, columns - 1);
+	while (element_position < temp.rows * temp.columns) {
+		for (int row_number = 1; row_number < rows + 1; row_number++) {
+			if (row_number != row) {
+				for (int column_number = 1; column_number < columns + 1; column_number++) {
+					if (column_number != column) {
+						temp[element_position] = matrix_element[get_element_position(row_number, column_number)];
+						element_position++;
+					}
+				}
+			}
+		}
+	}
+	return temp;
+}
+
+double matrix::get_square_determinant()
+{
+	if (rows == columns) {
+		if (rows == 2 && columns == 2) {
+			double determinant = matrix_element[0] * matrix_element[3] - matrix_element[1] * matrix_element[2];
+			return determinant;
+		}
+		else {
+			double determinant = 0;
+			for (int i = 1, j = 1; j < columns + 1;j++) {
+				matrix temp = shrink_matrix(i, j);
+				determinant += pow(-1, i + j) * temp.get_square_determinant() * matrix_element[get_element_position(i,j)];
+			}
+			return determinant;
+		}	
+	}
+	else {
+		std::cout << "This function only works for square matrices" << std::endl;
+		exit(1);
+	}
 }
 
 double& matrix::operator[] (int i)
@@ -190,15 +233,82 @@ std::ostream& operator<<(std::ostream& os, const matrix& m)
 	return os;
 }
 
+std::istream& operator>>(std::istream& is, matrix& m)
+{
+	bool validated = false;
+	int rows, columns;
+	std::string input_string;
+	while (!validated) {
+		std::cout << "Enter the rows of the matrix" << std::endl;
+		std::cin >> rows;
+		std::cout << "Enter the columns of the matrix" << std::endl;
+		std::cin >> columns;
+		if (std::cin.fail()) {
+			std::cin.clear();
+			std::cin.ignore();
+			std::cout << "Try again" << std::endl;
+			continue;
+		}
+		else {
+			m.set_columns(columns);
+			m.set_rows(rows);
+			m.change_size(rows, columns);
+			for (int i = 0; i < rows * columns; i++) {
+				double input_element;
+				std::cout << "Input the matrix element at position " << i + 1 << std::endl;
+				std::cin >> input_element;
+				if (std::cin.fail()) {
+					std::cout << "Could not write that to this position" << std::endl;
+					std::cin.ignore();
+					std::cin.clear();
+					break;
+					continue;
+				}
+				else {
+					m.matrix_element[i] = input_element;
+				}
+			}
+			validated = true;
+		}
+	}
+	return is;
+}
+
 int main()
 {
-	matrix m1(2, 2);
-	matrix m2;
-	for (int i = 0; i < 4; i++) {
-		m1[i] = i;
+	matrix m1(3,3); //create m1 (012/345/678)
+	for (int i = 0; i < 9; i++) {
+		m1[i] = i; //overloaded [] operator
 	}
-	m2 = m1;
-	matrix m3;
-	m3 = m1 * m2;
-	return 0;
+	std::cout << "m1 = " << m1 << std::endl;
+	matrix m3, m4, m5, m6;
+	matrix m2 = m1; //call copy constructor
+	m4 = m1; //call assignment operator
+	for (int i = 0; i < 9; i++) {
+		m1[i] = i + 1;
+	}
+	std::cout << "m1 = " << std::endl << m1 << std::endl;
+	std::cout << "m2 = " << std::endl << m2 << std::endl; //show that copy constructor and assignment operator performs a deep copy by printing changed m1 and unchanged m2, m4
+	std::cout << "m4 = " << std::endl << m4 << std::endl;
+
+	m3 = std::move(m1); //move constructor
+	std::cout << "m1 = " << std::endl << m1 << std::endl;
+	std::cout << "m3 = " << std::endl << m3 << std::endl;
+
+	//show overloaded arithmetic operators
+	std::cout << "m3 + m2 = " << std::endl << m3 + m2 << std::endl;
+	std::cout << "m3 - m2 = " << std::endl << m3 - m2 << std::endl;
+	std::cout << "m3 * m2 = " << std::endl << m3 * m2 << std::endl;
+
+	//show shrink matrix
+	m5 = m2.shrink_matrix(1, 3);
+	std::cout << "The shrunk matrix of m2, m5 = " << std::endl << m5 << std::endl;
+
+	//show get_determinant
+	double determinant = m2.get_square_determinant();
+	std::cout << "The determinant of m2 = " << determinant << std::endl;
+
+	//show overloaded >>
+	std::cin >> m6;
+	std::cout << m6;
 }
