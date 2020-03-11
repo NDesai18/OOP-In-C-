@@ -100,6 +100,66 @@ public:
 
 };
 
+std::ostream& operator<<(std::ostream& os, const matrix& m)
+{
+	int element_position = 0;
+	int row_counter = 0; //tracks where along the row the element is
+	for (int i = 0; i < m.rows * m.columns; i++) {
+		os << m.matrix_element[i] << " ";
+		row_counter++;
+		if (row_counter == m.columns) {
+			os << std::endl;
+			row_counter = 0;
+			continue;
+		}
+		else {
+			continue;
+		}
+	}
+	return os;
+}
+
+std::istream& operator>>(std::istream& is, matrix& m)
+{
+	bool validated = false;
+	int rows, columns;
+	std::string input_string;
+	while (!validated) {
+		std::cout << "Enter the rows of the matrix" << std::endl;
+		std::cin >> rows;
+		std::cout << "Enter the columns of the matrix" << std::endl;
+		std::cin >> columns;
+		if (std::cin.fail()) {
+			std::cin.clear();
+			std::cin.ignore();
+			std::cout << "Try again" << std::endl;
+			continue;
+		}
+		else {
+			m.set_columns(columns);
+			m.set_rows(rows);
+			m.change_size(rows, columns);
+			for (int i = 0; i < rows * columns; i++) {
+				double input_element;
+				std::cout << "Input the matrix element at position " << i + 1 << std::endl;
+				std::cin >> input_element;
+				if (std::cin.fail()) {
+					std::cout << "Could not write that to this position" << std::endl;
+					std::cin.ignore();
+					std::cin.clear();
+					break;
+					continue;
+				}
+				else {
+					m.matrix_element[i] = input_element;
+				}
+			}
+			validated = true;
+		}
+	}
+	return is;
+}
+
 matrix::matrix(int r, int c)
 {
 	rows = r;
@@ -212,66 +272,6 @@ matrix& matrix::operator=(matrix&& m) {
 	std::swap(columns, m.columns);
 	std::swap(matrix_element, m.matrix_element);
 	return *this;
-}
-
-std::ostream& operator<<(std::ostream& os, const matrix& m)
-{
-	int element_position = 0;
-	int row_counter = 0; //tracks where along the row the element is
-	for (int i = 0; i < m.rows * m.columns; i++) {
-		os << m.matrix_element[i] << " ";
-		row_counter++;
-		if (row_counter == m.columns) {
-			os << std::endl;
-			row_counter = 0;
-			continue;
-		}
-		else {
-			continue;
-		}
-	}
-	return os;
-}
-
-std::istream& operator>>(std::istream& is, matrix& m)
-{
-	bool validated = false;
-	int rows, columns;
-	std::string input_string;
-	while (!validated) {
-		std::cout << "Enter the rows of the matrix" << std::endl;
-		std::cin >> rows;
-		std::cout << "Enter the columns of the matrix" << std::endl;
-		std::cin >> columns;
-		if (std::cin.fail()) {
-			std::cin.clear();
-			std::cin.ignore();
-			std::cout << "Try again" << std::endl;
-			continue;
-		}
-		else {
-			m.set_columns(columns);
-			m.set_rows(rows);
-			m.change_size(rows, columns);
-			for (int i = 0; i < rows * columns; i++) {
-				double input_element;
-				std::cout << "Input the matrix element at position " << i + 1 << std::endl;
-				std::cin >> input_element;
-				if (std::cin.fail()) {
-					std::cout << "Could not write that to this position" << std::endl;
-					std::cin.ignore();
-					std::cin.clear();
-					break;
-					continue;
-				}
-				else {
-					m.matrix_element[i] = input_element;
-				}
-			}
-			validated = true;
-		}
-	}
-	return is;
 }
 
 int main()
