@@ -1,0 +1,134 @@
+#include<iostream>
+#include<cmath>
+#include<sstream>
+
+class vector
+{
+protected:
+	char name = 'v';
+	double* component = nullptr;
+	int length = 0;
+
+	friend std::ostream& operator<<(std::ostream& os, const vector& v);
+
+public:
+	//Constructors and destructors
+	vector() = default; //create vector v with 0 length and no components
+	vector(char c, int n);
+	~vector();
+
+	//Copy and Move constructors
+	vector(vector&);
+	vector(vector&&);
+
+	//Functions
+	int get_length() { return length; }
+	double get_component(int component_number);
+	double dot_product(const vector& v1, const vector& v2);
+
+	//overload operators
+	double& operator[] (int i);
+	double& operator() (double x, double y, double z); //Overload () operator to set the x,y,z components of a 3-vector
+};
+
+std::ostream& operator<<(std::ostream& os, const vector& v)
+{
+	if (v.length == 3) { //For 3-vectors, return the vector in terms of x,y,z components
+		os << v.name << "= " << v.component[0] << "x + " << v.component[1] << "y + " << v.component[2] << "z" << std::endl;
+		return os;
+	}
+	else { //For any other vector, return the vector as a column matrix
+		for (int i = 0; i < v.length; i++) {
+			os << v.component[i] << std::endl;
+		}
+		return os;
+	}
+}
+
+vector::vector(char c, int n)
+{
+	name = c;
+	length = n;
+	component = new double[n];
+	for (int i = 0; i < n; i++) {
+		component[i] = 0;
+	}
+}
+
+vector::~vector()
+{
+	std::cout << "Destroying vector " << name << std::endl;
+	delete component;
+}
+
+vector::vector(vector& v)
+{
+	length = v.length; 
+	component = 0;
+	if (length > 0) {
+		component = new double[length];
+		for (int i = 0; i < length; i++) {
+			component[i] = v.component[i];
+		}
+	}
+}
+
+vector::vector(vector&& v)
+{ 
+	length = v.length;
+	component = v.component;
+	v.length = 0;
+	v.component = nullptr;
+}
+
+double vector::get_component(int component_number)
+{
+	return component[component_number];
+}
+
+double vector::dot_product(const vector& v1,const vector& v2)
+{
+	if (v1.length == v2.length) {
+		double dot_product = 0;
+		for (int i = 0; i < v1.length; i++) {
+			dot_product += v1.component[i] * v2.component[i];
+		}
+		return dot_product;
+	}
+	else {
+		std::cout << "The vectors must be of equal length" << std::endl;
+	}
+}
+
+double& vector::operator[](int i)
+{
+	return component[i];
+}
+
+double& vector::operator()(double x, double y, double z)
+{
+	if (length != 3) {
+		std::cout << "Can only edit 3-vectors" << std::endl;
+	}
+	else {
+		component[0] = x;
+		component[1] = y;
+		component[2] = z;
+		for (int i = 0; i < 3; i++) {
+			return component[i];
+		}
+	}
+}
+
+class minkowski_vectors : protected vector {
+
+};
+
+int main() {
+	vector v1('v', 3);
+	vector v2;
+	std::cout << v1 << std::endl;
+	v1(3, 4, 2);
+	v2(1, 2, 3);
+	std::cout << v1 << std::endl;
+}
