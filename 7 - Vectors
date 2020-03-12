@@ -63,7 +63,7 @@ vector::~vector()
 
 vector::vector(vector& v)
 {
-	length = v.length; 
+	length = v.length;
 	component = 0;
 	if (length > 0) {
 		component = new double[length];
@@ -74,7 +74,7 @@ vector::vector(vector& v)
 }
 
 vector::vector(vector&& v)
-{ 
+{
 	length = v.length;
 	component = v.component;
 	v.length = 0;
@@ -83,10 +83,15 @@ vector::vector(vector&& v)
 
 double vector::get_component(int component_number)
 {
-	return component[component_number];
+	if (component_number < length) {
+		return component[component_number];
+	}
+	else {
+		std::cout << "Cannot access component outside of length of vector" << std::endl;
+	}
 }
 
-double vector::dot_product(const vector& v1,const vector& v2)
+double vector::dot_product(const vector& v1, const vector& v2)
 {
 	if (v1.length == v2.length) {
 		double dot_product = 0;
@@ -102,7 +107,12 @@ double vector::dot_product(const vector& v1,const vector& v2)
 
 double& vector::operator[](int i)
 {
-	return component[i];
+	if (i < length) {
+		return component[i];
+	}
+	else {
+		std::cout << "Cannot access component outside of length of the vector" << std::endl;
+	}
 }
 
 double& vector::operator()(double x, double y, double z)
@@ -120,15 +130,93 @@ double& vector::operator()(double x, double y, double z)
 	}
 }
 
-class minkowski_vectors : protected vector {
+class minkowski_vector : protected vector {
+protected:
+	char name = 'm';
+	length = 4;
+	friend std::ostream& operator<<(std::ostream& os, const minkowski_vector& mv);
+
+public:
+	
+	//Constructors and destructor
+	minkowski_vector();
+	minkowski_vector(double ct, double x, double y, double z);
+	minkowski_vector(double ct, vector& v);
+	~minkowski_vector() { std::cout << "Destroying minkowski vector" << std::endl; delete component };
+
+	//Copy and move constructors
+	minkowski_vector(minkowski_vector&);
+	minkowski_vector(minkowski_vector&&);
+
+	//Overload operators
+	double minkowski_vector& operator[](int i);
+	minkowski_vector minkowski_vector& operator() (double ct, double x, double y, double z);
+
+	//Override dot_product
+
+	minkowski_vector get_lorentz_boost(const vector& v);
 
 };
 
-int main() {
-	vector v1('v', 3);
-	vector v2;
-	std::cout << v1 << std::endl;
-	v1(3, 4, 2);
-	v2(1, 2, 3);
-	std::cout << v1 << std::endl;
+minkowski_vector::minkowski_vector(double ct, double x, double y, double z)
+{
+	length = 4;
+	component[0] = ct;
+	component[1] = x;
+	component[2] = y;
+	component[3] = z;
 }
+
+minkowski_vector::minkowski_vector(double ct, vector& v)
+{
+	length = 4;
+	component[0] = ct;
+	for (int i = 0; i < length; i++) {
+		component[i + 1] = v.component[i];
+	}
+}
+
+minkowski_vector::minkowski_vector(minkowski_vector& mv)
+{
+	length = mv.length;
+	component = 0;
+	if (length > 0) {
+		component = new double[length];
+		for (int i = 0; i < length; i++) {
+			component[i] = mv.component[i];
+		}
+	}
+}
+
+minkowski_vector::minkowski_vector(minkowski_vector&& mv)
+{
+	length = mv.length;
+	component = mv.component;
+	mv.length = 0;
+	mv.component = nullptr;
+}
+
+double minkowski_vector::minkowski_vector& operator[](int i)
+{
+	if (i < length) {
+		return component[i];
+	}
+	else {
+		std::cout << "Cannot access component outside of length of vector" << std::endl;
+	}
+}
+
+std::ostream& operator<<(std::ostream& os, const minkowski_vector& mv)
+{
+	os << "(ct, x, y, z) = (" << mv.component[0] << "," << mv.component[1] << "," << mv.component[2] << "," << mv.component[3] << ")" << std::endl;
+	return os;
+}
+
+	int main() {
+		vector v1('v', 3);
+		vector v2;
+		std::cout << v1 << std::endl;
+		v1(3, 4, 2);
+		v2(1, 2, 3);
+		std::cout << v1 << std::endl;
+	}
