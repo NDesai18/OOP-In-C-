@@ -15,6 +15,7 @@ public:
 	//Constructors and destructors
 	vector() = default; //create vector v with 0 length and no components
 	vector(char c, int n);
+	vector(char c, double x, double y, double z);
 	~vector();
 
 	//Copy and Move constructors
@@ -22,13 +23,17 @@ public:
 	vector(vector&&);
 
 	//Functions
-	int get_length() { return length; }
-	double get_component(int component_number);
-	double dot_product(const vector& v1, const vector& v2);
+	int get_length() const { return length; }
+	double get_component(int component_number) const;
+	double dot_product(const vector& v);
 
 	//overload operators
 	double& operator[] (int i);
 	double& operator() (double x, double y, double z); //Overload () operator to set the x,y,z components of a 3-vector
+	vector& operator=(const vector& v);
+	vector& operator+(const vector& v);
+	vector& operator+(const double scalar);
+	vector& operator*(const double scalar);
 };
 
 std::ostream& operator<<(std::ostream& os, const vector& v)
@@ -55,10 +60,20 @@ vector::vector(char c, int n)
 	}
 }
 
+vector::vector(char c, double x, double y, double z)
+{
+	name = c;
+	length = 3;
+	component = new double[3];
+	component[0] = x;
+	component[1] = y;
+	component[2] = z;
+}
+
 vector::~vector()
 {
-	std::cout << "Destroying vector " << name << std::endl;
-	delete component;
+	std::cout << "Destroying vector " << name << std::endl; 
+	delete[] component;
 }
 
 vector::vector(vector& v)
@@ -81,7 +96,7 @@ vector::vector(vector&& v)
 	v.component = nullptr;
 }
 
-double vector::get_component(int component_number)
+double vector::get_component(int component_number) const
 {
 	if (component_number < length) {
 		return component[component_number];
@@ -91,12 +106,12 @@ double vector::get_component(int component_number)
 	}
 }
 
-double vector::dot_product(const vector& v1, const vector& v2)
+double vector::dot_product(const vector& v)
 {
-	if (v1.length == v2.length) {
+	if (v.length == length) {
 		double dot_product = 0;
-		for (int i = 0; i < v1.length; i++) {
-			dot_product += v1.component[i] * v2.component[i];
+		for (int i = 0; i < length; i++) {
+			dot_product += component[i] * v.component[i];
 		}
 		return dot_product;
 	}
@@ -130,53 +145,98 @@ double& vector::operator()(double x, double y, double z)
 	}
 }
 
-class minkowski_vector : protected vector {
-protected:
-	char name = 'm';
-	length = 4;
-	friend std::ostream& operator<<(std::ostream& os, const minkowski_vector& mv);
-
-public:
-	
-	//Constructors and destructor
-	minkowski_vector();
-	minkowski_vector(double ct, double x, double y, double z);
-	minkowski_vector(double ct, vector& v);
-	~minkowski_vector() { std::cout << "Destroying minkowski vector" << std::endl; delete component };
-
-	//Copy and move constructors
-	minkowski_vector(minkowski_vector&);
-	minkowski_vector(minkowski_vector&&);
-
-	//Overload operators
-	double minkowski_vector& operator[](int i);
-	minkowski_vector minkowski_vector& operator() (double ct, double x, double y, double z);
-
-	//Override dot_product
-
-	minkowski_vector get_lorentz_boost(const vector& v);
-
-};
-
-minkowski_vector::minkowski_vector(double ct, double x, double y, double z)
+vector& vector::operator=(const vector& v)
 {
-	length = 4;
-	component[0] = ct;
-	component[1] = x;
-	component[2] = y;
-	component[3] = z;
+	if (&v == this) {
+		return *this;
+	}
+	delete[] component;
+	length = 0;
+	component = 0;
+	length = v.length;
+	component = new double[length];
+	if (length > 0) {
+		for (int i = 0; i < length; i++) {
+			component[i] = v.component[i];
+		}
+	}
+	return *this;
 }
 
-minkowski_vector::minkowski_vector(double ct, vector& v)
+vector& vector::operator+(const vector& v)
 {
-	length = 4;
-	component[0] = ct;
-	for (int i = 0; i < length; i++) {
-		component[i + 1] = v.component[i];
+	if (length == v.length) {
+		vector temp('t', length);
+		for (int i = 0; i < length; i++) {
+			temp[i] = component[i] + v.component[i];
+		}
+		return temp;
+	}
+	else {
+		std::cout << "Cannot add two vectors of different lengths" << std::endl;
 	}
 }
 
-minkowski_vector::minkowski_vector(minkowski_vector& mv)
+vector& vector::operator+(const double scalar)
+{
+	vector temp('t', length);
+	for (int i = 0; i < length; i++) {
+		temp[i] = component[i] + scalar;
+	}
+	return temp;
+}
+
+vector& vector::operator*(const double scalar)
+{
+	vector temp('t', length);
+	for (int i = 0; i < length; i++) {
+		temp[i] = component[i] * scalar;
+	}
+	return temp;
+}
+
+class four_vector : public vector
+{
+protected:
+	friend std::ostream& operator<<(std::ostream& os, const four_vector& mv);
+
+public:
+
+	//Constructors and destructor
+	four_vector() :
+		vector{ 'm', 4 } {}
+	four_vector(double ct, double x, double y, double z) : vector{ 'm', 4 }
+	{
+		component[0] = ct;
+		component[1] = x;
+		component[2] = y;
+		component[3] = z;
+	}
+	four_vector(double ct, vector& v) : vector('m', 4)
+	{
+		component[0] = ct;
+		for (int i = 1; i < length; i++) {
+			component[i] = v.get_component(i-1);
+		}
+	}
+	~four_vector() { std::cout << "Destroying four vector" << std::endl; delete component; }
+
+	//Copy and move constructors
+	four_vector(four_vector&);
+	four_vector(four_vector&&);
+
+	//Overload operators
+	double& operator[](int i);
+	four_vector& operator=(const four_vector &fv);
+
+	//Override dot_product
+	double dot_product(const vector& v);
+
+	four_vector get_lorentz_boost(vector& v) const;
+
+};
+
+four_vector::four_vector(four_vector& mv)
 {
 	length = mv.length;
 	component = 0;
@@ -188,7 +248,7 @@ minkowski_vector::minkowski_vector(minkowski_vector& mv)
 	}
 }
 
-minkowski_vector::minkowski_vector(minkowski_vector&& mv)
+four_vector::four_vector(four_vector&& mv)
 {
 	length = mv.length;
 	component = mv.component;
@@ -196,7 +256,7 @@ minkowski_vector::minkowski_vector(minkowski_vector&& mv)
 	mv.component = nullptr;
 }
 
-double minkowski_vector::minkowski_vector& operator[](int i)
+double& four_vector::operator[](int i)
 {
 	if (i < length) {
 		return component[i];
@@ -206,17 +266,138 @@ double minkowski_vector::minkowski_vector& operator[](int i)
 	}
 }
 
-std::ostream& operator<<(std::ostream& os, const minkowski_vector& mv)
+
+four_vector& four_vector::operator=(const four_vector& fv)
+{
+	if (&fv == this) {
+		return *this;
+	}
+	delete[] component;
+	length = 0;
+	component = nullptr;
+	length = fv.length;
+	component = new double[length];
+	if (length > 0) {
+		for (int i = 0; i < length; i++) {
+			component[i] = fv.component[i];
+		}
+	}
+	return *this;
+}
+
+double four_vector::dot_product(const vector& v)
+{
+	double dot_product = component[0] * v.get_component(0);
+	for (int i = 1; i < 4; i++) {
+		dot_product -= component[i] * v.get_component(i);
+	}
+	return dot_product;
+}
+
+four_vector four_vector::get_lorentz_boost(vector& v) const //Using natural units
+{
+	if (v.get_length() == 3) {
+		double gamma, r_dot_beta, beta_squared;
+		beta_squared = v.dot_product(v);
+		vector r('r', 3);
+		for (int i = 0; i < 3; i++) {
+			r[i] = v.get_component(i);
+		}
+		r_dot_beta = r.dot_product(v);
+		gamma = pow(1 - beta_squared, -0.5);
+		vector r_prime('r', 3);
+		double r_boost = ((gamma - 1) * r_dot_beta) / beta_squared - gamma;
+		r_prime = r + r_boost;
+		double ct_prime = gamma * (-1 * v.dot_product(r));
+		four_vector temp(ct_prime, r_prime);
+		return temp;
+	}
+	else {
+		std::cout << "Beta must be a 3-vector" << std::endl;
+	}
+}
+
+std::ostream& operator<<(std::ostream& os, const four_vector& mv)
 {
 	os << "(ct, x, y, z) = (" << mv.component[0] << "," << mv.component[1] << "," << mv.component[2] << "," << mv.component[3] << ")" << std::endl;
 	return os;
 }
 
-	int main() {
-		vector v1('v', 3);
-		vector v2;
-		std::cout << v1 << std::endl;
-		v1(3, 4, 2);
-		v2(1, 2, 3);
-		std::cout << v1 << std::endl;
+class particle : public four_vector, public vector //a particle class, taking inputs in natural units (c = 1 etc). Mass in units of MeV/c^2
+{
+protected:
+	four_vector position;
+	double mass;
+	vector beta{'b', 3};
+
+public:
+	particle(const four_vector& mv, double m, vector& v) : vector{ 'b',3 }, four_vector{ mv.get_component(0), mv.get_component(1), mv.get_component(2), mv.get_component(3) }
+	{
+		beta(v[0], v[1], v[2]);
+		mass = m;
 	}
+	~particle() { std::cout << "Destroying particle" << std::endl, delete[] vector::component, delete [] four_vector::component; }
+	
+	double get_gamma();
+	double get_energy();
+	vector get_momentum();
+
+};
+
+double particle::get_gamma()
+{
+	double beta_squared = beta.dot_product(beta);
+	double gamma = pow(1 - beta_squared, -0.5);
+	return gamma;
+}
+
+vector particle::get_momentum()
+{
+	double gamma = get_gamma();
+	vector momentum('p', 3);
+	momentum = beta * gamma * mass;
+	return momentum;
+}
+
+double particle::get_energy()
+{
+	vector momentum = get_momentum();
+	double momentum_squared = momentum.dot_product(momentum);
+	double energy = pow(momentum_squared * momentum_squared + mass * mass, 0.5);
+	return energy;
+}
+
+int main() {
+	//Vectors
+	vector v1('v', 3);
+	vector v2('w', 1, 2, 3);
+	std::cout << v1 << std::endl;
+	v1(3, 4, 2); //overload () operator to set components of a vector
+	std::cout << v1 << std::endl;
+	std::cout << v2 << std::endl; //insert vector into ostream using friend function
+	double dot_product = v1.dot_product(v2);
+	std::cout << "The dot product of v1 and v2 is given by " << dot_product << std::endl;
+	vector beta('b', 0.8, 0.8, 0.8);
+	std::cout << beta << std::endl;
+
+	//Four vectors
+	//four_vector fv1; //default constructor (calls vector constructor to make the four_vector (0,0,0,0))
+	//std::cout << fv1 << std::endl;
+	four_vector fv2(1, beta); //parameterised constructor with double ct and vector beta (in natural units)
+	std::cout << "fv2 is given by " << fv2 << std::endl;
+	four_vector fv3(1, 0.6, 0.4, 0.2); //paramaterised constructor with 4 doubles
+	std::cout << "fv3 is given by " << fv3 << std::endl;
+	double four_dot_product = fv2.dot_product(fv3);
+	std::cout << "The dot product of fv2 and fv1 is given by" << four_dot_product << std::endl;
+	four_vector fv1 = fv3.get_lorentz_boost(beta);
+	std::cout << "The Lorentz boost of beta " << beta << "is given by " << fv1 << std::endl;
+
+	//Particles
+	particle proton(fv2, 938.27, beta); //Make a particle with fv2, and beta as its defining vectors
+	double gamma = proton.get_gamma();
+	double energy = proton.get_energy();
+	std::cout << "Our proton has gamma = " << gamma << " and energy " << energy << "MeV" << std::endl;
+	vector momentum = proton.get_momentum();
+	std::cout << "Its momentum is given by" << momentum << std::endl;
+
+}
