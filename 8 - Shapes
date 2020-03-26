@@ -1,0 +1,362 @@
+#include<iostream>
+#include<cmath>
+#include<string>
+#include<vector>
+
+class shape
+{
+protected:
+	std::string name;
+	int dimensions;
+
+public:
+	shape() { name = "default", dimensions = 0; }
+	shape(std::string name, int d) { name = name, dimensions = d; }
+	virtual ~shape() {};
+
+	virtual void set_dimensions(int n) { dimensions = n; }
+	virtual void set_name(std::string temp) { name = temp; }
+	virtual void get_info() { std::cout << "This is a default shape"; }
+	virtual double get_area() { return 0; }; //returns area of a 2D shape, surface area of a 3D shape
+	virtual double get_volume() { return 0; }; //returns volume of a 3D shape, 0 for 2D shapes
+
+};
+
+class two_dimensional : public shape
+{
+protected:
+	int sides = 0;
+
+public:
+	two_dimensional() : shape{ " ",2 } { sides = 0; }
+	two_dimensional(int n) : shape{ " ", 2 } { sides = n; }
+	virtual ~two_dimensional() {};
+
+};
+
+class three_dimensional : public shape
+{
+protected:
+	int edges, faces, corners = 0;
+
+public:
+	three_dimensional() : shape{ " ", 3 } { edges = faces = corners = 0; }
+	three_dimensional(int e, int f, int c) : shape{ " ", 3 } { edges = e, faces = f, corners = c; }
+	virtual ~three_dimensional() {};
+
+};
+
+class prism : public three_dimensional
+{
+protected:
+	two_dimensional* face = nullptr;
+	double depth = 0;
+
+public:
+	prism() : three_dimensional() { face = nullptr, depth = 0; }
+	prism(two_dimensional* base, double d) { face = base, depth = d; }
+	~prism() {};
+
+	double get_area(); //returns the area of the face of the prism
+	double get_volume();
+	void get_info();
+
+};
+
+double prism::get_area()
+{
+	double area = face->get_area();
+	return area;
+}
+
+double prism::get_volume()
+{
+	double volume = face->get_area() * depth;
+	return volume;
+}
+
+void prism::get_info()
+{
+	std::cout << "This is a prism with depth " << depth << " The face is " << std::endl;
+	face->get_info();
+}
+
+class square : public two_dimensional
+{
+protected:
+	double side_length;
+
+public:
+	square() : two_dimensional { 4 } { side_length = 1, shape::set_name("square"); } //Make a unit square by default
+	square(double x) : two_dimensional{ 4 } { side_length = x, shape::set_name("square"); }
+	~square() {};
+
+	double get_area();
+	double get_volume() { return 0; }
+	void get_info();
+
+};
+
+double square::get_area()
+{
+	double area = side_length * side_length;
+	return area;
+}
+
+void square::get_info()
+{
+	std::cout << "This is a square with side length " << side_length << std::endl;
+}
+
+
+class rectangle : public two_dimensional
+{
+protected:
+	double long_length;
+	double short_length;
+
+public:
+	rectangle() : two_dimensional{ 4 } { long_length = 1, short_length = 1, shape::set_name("rectangle" );} //Make a unit square by default
+	rectangle(double x, double y) : two_dimensional{ 4 } { long_length = x, short_length = y, shape::set_name("rectangle"); }
+	~rectangle() {};
+
+	double get_area();
+	double get_volume() { return 0; }
+	void get_info();
+};
+
+double rectangle::get_area()
+{
+	double area = long_length * short_length;
+	return area;
+}
+
+void rectangle::get_info()
+{
+	std::cout << "This is a rectangle with sides " << short_length << " and " << long_length << std::endl;
+}
+
+class circle : public two_dimensional
+{
+protected:
+	double radius;
+
+public:
+	circle() : two_dimensional{ 1 } { radius = 1, shape::set_name("circle"); } //Make a unit circle by default
+	circle(double r) : two_dimensional{ 1 } { radius = r, shape::set_name("circle"); }
+	~circle() {};
+
+	double get_area();
+	double get_volume() { return 0; }
+	void get_info();
+
+};
+
+double circle::get_area()
+{
+	const double pi = 3.14;
+	double area = pi * radius * radius;
+	return area;
+}
+
+void circle::get_info()
+{
+	std::cout << "This is a circle with radius " << radius << std::endl;
+}
+
+class ellipse : public two_dimensional
+{
+protected:
+	double major_axis;
+	double minor_axis;
+
+public:
+	ellipse() : two_dimensional{ 1 } { major_axis = 1, minor_axis = 1; }
+	ellipse(double a, double b) : two_dimensional{ 1 } { major_axis = a, minor_axis = b, shape::set_name("ellipse"); }
+	~ellipse() {};
+
+	double get_area();
+	double get_volume() { return 0; }
+	void get_info();
+
+};
+
+double ellipse::get_area()
+{
+	const double pi = 3.14;
+	double area = pi * major_axis * minor_axis;
+	return area;
+}
+
+void ellipse::get_info()
+{
+	std::cout << "This is an ellipse with major axis " << major_axis << " and minor axis " << minor_axis << std::endl;
+}
+
+class cube : public shape 
+{
+protected:
+	double side_length;
+
+public: 
+	cube() : shape{ "cube", 3 } { side_length = 1; }
+	cube(double x) : shape{"cube", 3} { side_length = x; }
+	~cube() {};
+
+	double get_area();
+	double get_volume();
+	void get_info();
+};
+
+double cube::get_area()
+{
+	double area = side_length * side_length * 6;
+	return area;
+}
+
+double cube::get_volume()
+{
+	double volume = pow(side_length, 3);
+	return volume;
+}
+
+void cube::get_info()
+{
+	std::cout << "This is a cube of side length " << side_length << std::endl;
+}
+
+class cuboid : public three_dimensional
+{
+protected:
+	double height, width, depth;
+
+public:
+	cuboid() : three_dimensional{12,6,8} { height = width = depth = 1, shape::set_name("cube"); }
+	cuboid(double x, double y, double z) : three_dimensional{ 12,6,8 } { height = x, width = y, depth = z, shape::set_name("cube"); }
+	~cuboid() {};
+
+	double get_volume();
+	double get_area();
+	void get_info();
+};
+
+double cuboid::get_volume()
+{
+	double volume = height * width * depth;
+	return volume;
+}
+
+double cuboid::get_area()
+{
+	double area = (height * width * 2) + (depth * height * 2) + (depth * width * 2);
+	return area;
+}
+
+void cuboid::get_info()
+{
+	std::cout << "This is a cuboid with height " << height << " width " << width << " and depth " << depth << std::endl;
+}
+
+class ellipsoid : public three_dimensional
+{
+protected:
+	double axis_1, axis_2, axis_3;
+
+public:
+	ellipsoid() : three_dimensional{ 0,1,0 } { axis_1 = axis_2 = axis_3 = 1; }
+	ellipsoid(double x, double y, double z) : three_dimensional{ 0,1,0 } { axis_1 = x, axis_2 = y, axis_3 = z; }
+	~ellipsoid() {};
+
+	double get_volume();
+	double get_area();
+	void get_info();
+};
+
+double ellipsoid::get_volume()
+{
+	const double pi = 3.14;
+	double volume = 4 / 3 * pi * axis_1 * axis_2 * axis_3;
+	return volume;
+}
+
+double ellipsoid::get_area()
+{
+	const double pi = 3.14;
+	const double p = 1.6;
+	const int denominator = 3;
+	double numerator = 4 * pi * pow((pow(axis_1 * axis_2, p) + pow(axis_1 * axis_3, p) + pow(axis_2 * axis_3, p)), 1 / p);
+	double area = numerator / pow(3, 1 / p);
+	return area;
+}
+
+void ellipsoid::get_info()
+{
+	std::cout << "This is an ellipsoid with major axis " << axis_1 << ", minor axis " << axis_2 << " and intermediate axis " << axis_3 << std::endl;
+}
+
+class sphere : public three_dimensional
+{
+protected:
+	double radius;
+
+public:
+	sphere() : three_dimensional{ 0,1,0 } { radius = 1; }
+	sphere(double r) : three_dimensional{ 0,1,0 } { radius = r; }
+	~sphere() {};
+
+	double get_volume();
+	double get_area();
+	void get_info();
+
+};
+
+double sphere::get_volume()
+{
+	const double pi = 3.14;
+	double volume = 4 / 3 * pi * pow(radius, 3);
+	return volume;
+}
+
+double sphere::get_area()
+{
+	const double pi = 3.14;
+	double area = 4 * pi * radius * radius;
+	return area;
+}
+
+void sphere::get_info()
+{
+	std::cout << "This is a sphere with radius " << radius << std::endl;
+}
+
+int main()
+{
+	std::vector<shape*> shape_vector;
+	shape_vector.push_back(new square(3));
+	shape_vector.push_back(new circle(3));
+	shape_vector.push_back(new rectangle(3,4));
+	shape_vector.push_back(new ellipse(2,3));
+	shape_vector.push_back(new cube(3));
+	shape_vector.push_back(new cuboid(3,4,5));
+	shape_vector.push_back(new ellipsoid(3,4,5));
+	shape_vector.push_back(new sphere(3));
+
+	circle c(5.0);
+	circle* circle_pointer;
+	circle_pointer = &c;
+	shape_vector.push_back(new prism(circle_pointer, 3));
+	
+	for (int i = 0; i < 9; i++) {
+		shape_vector[i]->get_info();
+		double area = shape_vector[i]->get_area();
+		double volume = shape_vector[i]->get_volume();
+		std::cout << "The area of this shape is " << area << " and the volume of the shape is " << volume << std::endl;
+		std::cout << std::endl;
+	}
+	for (auto vector_iterator = shape_vector.begin(); vector_iterator < shape_vector.end(); vector_iterator++) {
+		delete* vector_iterator;
+	}
+	shape_vector.clear();
+	return 0;
+
+}
